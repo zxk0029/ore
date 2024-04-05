@@ -104,7 +104,22 @@ auto_restart_ore() {
     fi
 }
 
+auto_claim_ore() {
+    # 定义一个screen会话名
+    local session_name="ore_auto_claim"
 
+    # 检查是否已经存在名为session_name的screen会话
+    if screen -list | grep -q "$session_name"; then
+        echo "已经存在一个名为'$session_name'的screen会话。"
+        echo "你可以使用 'screen -r $session_name' 命令重新连接到这个会话。"
+    else
+        # 创建一个新的detached screen会话并在其中运行命令
+        echo "创建新的screen会话 '$session_name' 并在其中执行ore-cli..."
+        screen -dmS "$session_name" bash -c 'cd ore-cli/target/release/; while true; do ./ore --rpc https://linguistic-dulcea-fast-mainnet.helius-rpc.com --keypair keypair.json claim; echo "ore claim命令中断，正在重启..."; sleep 60; done'
+        echo "已在后台screen会话 '$session_name' 中启动ore-cli。"
+        echo "使用 'screen -r $session_name' 命令可以重新连接到这个会话。"
+    fi
+}
 # 主菜单函数
 function main_menu() {
     clear
@@ -112,12 +127,14 @@ function main_menu() {
     echo "1. 安装节点"
     echo "2. 准备ore-cli环境"
     echo "3. 启动并自动重启ore-cli"
+    echo "4. 自动重复claim ore"
     read -p "请输入选项（1-3）: " OPTION
 
     case $OPTION in
         1) install_node ;;
         2) prepare_ore_environment ;;
         3) auto_restart_ore ;;
+        4) auto_claim_ore ;;
         *) echo "无效选项。" && sleep 2 && main_menu ;;
     esac
 }
