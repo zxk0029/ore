@@ -120,6 +120,13 @@ auto_claim_ore() {
         echo "使用 'screen -r $session_name' 命令可以重新连接到这个会话。"
     fi
 }
+
+rewards_ore() {
+    echo "查询ore数量..."
+    cd ore-cli/target/release/ || { echo "目录切换失败，ore-cli可能未正确安装。"; return; }
+    ./ore --rpc https://api.mainnet-beta.solana.com --keypair keypair.json rewards
+}
+
 # 主菜单函数
 function main_menu() {
     clear
@@ -128,13 +135,15 @@ function main_menu() {
     echo "2. 准备ore-cli环境"
     echo "3. 启动并自动重启ore-cli"
     echo "4. 自动重复claim ore"
-    read -p "请输入选项（1-3）: " OPTION
+    echo "5. 查询挖取ore数量"
+    read -p "请输入选项（1-5）: " OPTION
 
     case $OPTION in
         1) install_node ;;
         2) prepare_ore_environment ;;
         3) auto_restart_ore ;;
         4) auto_claim_ore ;;
+        5) rewards_ore ;;
         *) echo "无效选项。" && sleep 2 && main_menu ;;
     esac
 }
